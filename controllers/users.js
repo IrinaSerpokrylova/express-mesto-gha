@@ -58,7 +58,11 @@ const createUser = (req, res) => {
 
 const updateUserProfile = (req, res) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    { new: true, runValidators: true },
+  )
     .then((user) => {
       if (!user) {
         res
@@ -76,8 +80,6 @@ const updateUserProfile = (req, res) => {
       } else {
         res.status(internalServerError).send({ message: 'Произошла ошибка' });
       }
-
-      console.log(err);
     });
 };
 
@@ -96,7 +98,7 @@ const updateUserAvatar = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(badRequestError).send({
-          message: 'Переданы некорректные данные при обновлении профиля',
+          message: 'Переданы некорректные данные при обновлении аватара',
         });
       } else {
         res.status(internalServerError).send({ message: 'Произошла ошибка' });

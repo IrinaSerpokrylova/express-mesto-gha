@@ -9,9 +9,9 @@ const {
 const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch(() =>
-      res.status(internalServerError).send({ message: 'Произошла ошибка' }),
-    );
+    .catch(() => {
+      res.status(internalServerError).send({ message: 'Произошла ошибка' });
+    });
 };
 
 const createCard = (req, res) => {

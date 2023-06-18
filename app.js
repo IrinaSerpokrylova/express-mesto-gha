@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '648dd61dc4c4ead7281f98fa', //  _id созданного пользователя
+    _id: '648f58fc41406e5fab7fb455', //  _id созданного пользователя
   };
 
   next();
@@ -32,7 +32,7 @@ app.use((req, res, next) => {
 app.use(routesUsers);
 app.use('/cards', routesCard);
 
-app.get('*', (req, res) => {
+app.all('*', (req, res) => {
   res.status(notFoundError).send({ message: 'Ресурс не найден' });
 });
 
