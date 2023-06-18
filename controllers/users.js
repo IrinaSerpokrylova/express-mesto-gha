@@ -1,12 +1,18 @@
 const User = require('../models/user');
 
+const {
+  badRequestError,
+  notFoundError,
+  internalServerError,
+} = require('../utils/errors');
+
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.status(200).send(users);
     })
     .catch(() => {
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(internalServerError).send({ message: 'Произошла ошибка' });
       next();
     });
 };
@@ -17,7 +23,7 @@ const getUserById = (req, res) => {
     .then((user) => {
       if (!user) {
         res
-          .status(404)
+          .status(notFoundError)
           .send({ message: 'Пользователь по указанному _id не найден' });
       } else {
         res.status(200).send(user);
@@ -25,11 +31,11 @@ const getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({
+        res.status(badRequestError).send({
           message: 'Передан некорректный id',
         });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(internalServerError).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -41,11 +47,11 @@ const createUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({
+        res.status(badRequestError).send({
           message: 'Переданы некорректные данные при создании пользователя',
         });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(internalServerError).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -56,7 +62,7 @@ const updateUserProfile = (req, res) => {
     .then((user) => {
       if (!user) {
         res
-          .status(404)
+          .status(notFoundError)
           .send({ message: 'Пользователь по указанному _id не найден' });
       } else {
         res.send({ data: user });
@@ -64,26 +70,36 @@ const updateUserProfile = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(500).send({
+        res.status(badRequestError).send({
           message: 'Переданы некорректные данные при обновлении профиля',
         });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(internalServerError).send({ message: 'Произошла ошибка' });
       }
+
+      console.log(err);
     });
 };
 
 const updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      if (!user) {
+        res
+          .status(notFoundError)
+          .send({ message: 'Пользователь по указанному _id не найден' });
+      } else {
+        res.send({ data: user });
+      }
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(500).send({
+        res.status(badRequestError).send({
           message: 'Переданы некорректные данные при обновлении профиля',
         });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(internalServerError).send({ message: 'Произошла ошибка' });
       }
     });
 };
