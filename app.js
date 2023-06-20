@@ -1,8 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const routesCard = require('./routes/cards');
-const routesUsers = require('./routes/users');
+const routes = require('./routes');
 const { notFoundError } = require('./utils/statuses');
 
 const { PORT = 3000 } = process.env;
@@ -29,8 +28,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(routesUsers);
-app.use('/cards', routesCard);
+app.use(routes);
 
 app.all('*', (req, res) => {
   res.status(notFoundError).send({ message: 'Ресурс не найден' });
