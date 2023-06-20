@@ -1,10 +1,11 @@
+const { default: mongoose } = require('mongoose');
 const Card = require('../models/card');
 
 const {
   badRequestError,
   notFoundError,
   internalServerError,
-} = require('../utils/errors');
+} = require('../utils/statuses');
 
 const getCards = (req, res) => {
   Card.find({})
@@ -20,7 +21,7 @@ const createCard = (req, res) => {
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof mongoose.Error.ValidationError) {
         res.status(badRequestError).send({
           message: 'Переданы некорректные данные при создании карточки',
         });
@@ -42,7 +43,7 @@ const deleteCardById = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err instanceof mongoose.Error.CastError) {
         res.status(badRequestError).send({
           message: 'Передан некорректный id карточки',
         });
@@ -68,7 +69,7 @@ const putCardLike = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err instanceof mongoose.Error.CastError) {
         res.status(badRequestError).send({
           message: 'Переданы некорректные данные для снятия лайка',
         });
@@ -94,7 +95,7 @@ const deleteCardLike = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err instanceof mongoose.Error.CastError) {
         res.status(badRequestError).send({
           message: 'Переданы некорректные данные для снятия лайка',
         });

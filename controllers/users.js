@@ -1,15 +1,17 @@
+const { default: mongoose } = require('mongoose');
 const User = require('../models/user');
 
 const {
   badRequestError,
   notFoundError,
   internalServerError,
-} = require('../utils/errors');
+  statusOK,
+} = require('../utils/statuses');
 
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
-      res.status(200).send(users);
+      res.status(statusOK).send(users);
     })
     .catch(() => {
       res.status(internalServerError).send({ message: 'Произошла ошибка' });
@@ -26,11 +28,11 @@ const getUserById = (req, res) => {
           .status(notFoundError)
           .send({ message: 'Пользователь по указанному _id не найден' });
       } else {
-        res.status(200).send(user);
+        res.status(statusOK).send(user);
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err instanceof mongoose.Error.CastError) {
         res.status(badRequestError).send({
           message: 'Передан некорректный id',
         });
@@ -46,7 +48,7 @@ const createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof mongoose.Error.ValidationError) {
         res.status(badRequestError).send({
           message: 'Переданы некорректные данные при создании пользователя',
         });
@@ -73,7 +75,7 @@ const updateUserProfile = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof mongoose.Error.ValidationError) {
         res.status(badRequestError).send({
           message: 'Переданы некорректные данные при обновлении профиля',
         });
@@ -85,7 +87,11 @@ const updateUserProfile = (req, res) => {
 
 const updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    { new: true, runValidators: true },
+  )
     .then((user) => {
       if (!user) {
         res
@@ -96,7 +102,7 @@ const updateUserAvatar = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof mongoose.Error.ValidationError) {
         res.status(badRequestError).send({
           message: 'Переданы некорректные данные при обновлении аватара',
         });
