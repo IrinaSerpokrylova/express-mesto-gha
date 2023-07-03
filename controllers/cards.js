@@ -1,7 +1,7 @@
 const { default: mongoose } = require('mongoose');
 const Card = require('../models/card');
 
-const { statusOK } = require('../utils/statuses');
+const { statusOK, created } = require('../utils/statuses');
 const BadRequestError = require('../utils/errors/bad-request-error');
 const ForbiddenError = require('../utils/errors/forbidden-error');
 const NotFoundError = require('../utils/errors/not-found-error');
@@ -16,7 +16,7 @@ const createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.send({ data: card }))
+    .then((card) => res.status(created).send({ data: card }))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         next(
