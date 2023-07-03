@@ -1,22 +1,67 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
+const bcrypt = require('bcryptjs');
+const UnauthorizedError = require('../utils/errors/unauthorized-error');
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    default: 'Жак-Ив Кусто',
     minlength: 2,
     maxlength: 30,
   },
   about: {
     type: String,
-    required: true,
+    default: 'Исследователь',
     minlength: 2,
     maxlength: 30,
   },
   avatar: {
     type: String,
+    default:
+      'https://www.giantfreakinrobot.com/wp-content/uploads/2020/08/beckett-mariner-star-trek-header-900x506.jpg',
+    validate: {
+      validator(v) {
+        return /^(https?):\/\/[^\s/$.?#].[^\s]*$/gim.test(v);
+      },
+      message: 'Введен некорректный URL',
+    },
+  },
+  email: {
+    type: String,
     required: true,
+    unique: true,
+    validate: {
+      validator: (v) => validator.isEmail(v),
+      message: 'Неправильный формат почты',
+    },
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false,
   },
 });
+
+userSchema.statics.findUserByCredentials = function findUserByCredentials(
+  email,
+  password,
+) {
+  return this.findOne({ email })
+    .select('+password')
+    .then((user) => {
+      if (!user) {
+        throw new UnauthorizedError('Неправильные почта или пароль');
+      }
+
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          throw new UnauthorizedError('Неправильные почта или пароль');
+        }
+
+        return user; // теперь user доступен
+      });
+    });
+};
 
 module.exports = mongoose.model('user', userSchema);
