@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     default:
-      'https://www.giantfreakinrobot.com/wp-content/uploads/2020/08/beckett-mariner-star-trek-header-900x506.jpg',
+      'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     validate: {
       validator(v) {
         return /^(https?):\/\/[^\s/$.?#].[^\s]*$/gim.test(v);
