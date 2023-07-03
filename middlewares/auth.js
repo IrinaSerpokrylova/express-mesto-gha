@@ -8,8 +8,8 @@ module.exports = (req, res, next) => {
   const secretKey = NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret';
 
   if (
-    (!authorization || !authorization.startsWith('Bearer ')) &&
-    !req.cookies.token
+    (!authorization || !authorization.startsWith('Bearer '))
+    && !req.cookies.token
   ) {
     throw new UnauthorizedError('Необходима авторизация');
   }
