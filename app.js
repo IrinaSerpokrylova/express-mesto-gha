@@ -8,7 +8,6 @@ const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const { errors } = require('celebrate');
 const routes = require('./routes');
-const NotFoundError = require('./utils/errors/not-found-error');
 
 const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
