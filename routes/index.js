@@ -9,15 +9,19 @@ const {
 } = require('../middlewares/validator');
 const auth = require('../middlewares/auth');
 
-router.get('/', auth, (req, res) => {
-  res.send('Hello World');
-});
-
 // роуты, не требующие авторизации (регистрация и логин)
 router.post('/signup', validateCreateUser, createUser);
 router.post('/signin', validateLogin, login);
 
-router.use('/users', auth, userRoutes);
-router.use('/cards', auth, cardRoutes);
+router.use(auth);
+
+router.get('/', (req, res) => {
+  res.send('Hello World');
+});
+
+
+
+router.use('/users', userRoutes);
+router.use('/cards', cardRoutes);
 
 module.exports = router;
