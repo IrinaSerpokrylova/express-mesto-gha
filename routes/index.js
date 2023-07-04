@@ -8,6 +8,7 @@ const {
   validateLogin,
 } = require('../middlewares/validator');
 const auth = require('../middlewares/auth');
+const NotFoundError = require('../utils/errors/not-found-error');
 
 // роуты, не требующие авторизации (регистрация и логин)
 router.post('/signup', validateCreateUser, createUser);
