@@ -19,9 +19,11 @@ router.get('/', (req, res) => {
   res.send('Hello World');
 });
 
-
-
 router.use('/users', userRoutes);
 router.use('/cards', cardRoutes);
+
+router.all('*', (req, res, next) => {
+  next(new NotFoundError('Ресурс не найден'));
+});
 
 module.exports = router;
