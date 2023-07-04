@@ -2,18 +2,22 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const errorHandler = require('./middlewares/error-handler');
+const helmet = require('helmet');
 const mongoose = require('mongoose');
+const rateLimit = require('express-rate-limit');
 const { errors } = require('celebrate');
 const routes = require('./routes');
 const NotFoundError = require('./utils/errors/not-found-error');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
-// const { createUser, login } = require('./controllers/users');
-// const auth = require('./middlewares/auth');
+const limiter = rateLimit({
+  max: 100, // лимит в 100 запросов в минуту (дефолт для windowMs)
+});
 
 mongoose
-  .connect('mongodb://localhost:27017/mestodb', {
+  .connect(DB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     family: 4,
@@ -26,22 +30,14 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(helmet());
+app.use(limiter);
 
 app.use(routes);
 
-app.all('*', (req, res, next) => {
-  next(new NotFoundError('Ресурс не найден'));
-});
-
 app.use(errors());
 
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-  res.status(statusCode).send({
-    message: statusCode === 500 ? 'Произошла ошибка' : message,
-  });
-  next();
-});
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
